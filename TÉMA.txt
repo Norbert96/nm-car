@@ -1,0 +1,3 @@
+Drónpálya optimalizálás
+
+- drón fizikájának modellezése
