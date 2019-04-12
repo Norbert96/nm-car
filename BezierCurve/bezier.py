@@ -11,6 +11,7 @@ class Bezier():
         self.t2 = end
         self.order = self.x.size - 1
         self.dpoint_x, self.dpoint_y = self.derive(self.x, self.y)
+        self.clockwise = self.compute_direction()
 
     def get(self, t):
         mt = 1 - t
@@ -32,12 +33,17 @@ class Bezier():
         a = mt * mt
         b = mt * t * 2
         c = t * t
-        dx  = self.dpoint_x[0]
+        dx = self.dpoint_x[0]
         dy = self.dpoint_y[0]
         abc = np.array([a, b, c])
         x = np.inner(abc, dx)
         y = np.inner(abc, dy)
         return [x, y]
+
+    def compute_direction(self):
+        p = np.stack((self.x, self.y), axis=-1)
+        angle = self.angle(p[0], p[self.order], p[1])
+        return angle > 0
 
     def derive(self, points_x, points_y):
         dpoint_x = []
@@ -243,15 +249,71 @@ class Bezier():
 
         return second
 
+    def offset(self, t, d):
+        # TODO linear
+        c = self.get(t)
+        n = self.normal(t)
+        x = c[0] + n[0] * d
+        y = c[1] + n[1] * d
+        return [x, y]
+
+    def lli4(self, p1, p2, p3, p4):
+        x1 = p1[0]
+        y1 = p1[1]
+        x2 = p2[0]
+        y2 = p2[1]
+        x3 = p3[0]
+        y3 = p3[1]
+        x4 = p4[0]
+        y4 = p4[1]
+
+        nx = (x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)
+        ny = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)
+        d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+        # TODO: an exception would be better here
+        if d == 0:
+            return False
+        return np.array([nx / d, ny / d])
+
+    def scale(self, d):
+        self.order
+        clockwise = self.clockwise
+
+        v = [self.offset(0, 10), self.offset(1, 10)]
+        points = ap = np.stack((self.x, self.y), axis=-1)
+
+        ap[0] = ap[0] + d * np.array(self.normal(0))
+        ap[-1] = ap[-1] + d * np.array(self.normal(1))
+
+        c0 = np.array(self.get(0))
+        c1 = np.array(self.get(1))
+        n0 = np.array(self.normal(0))
+        n1 = np.array(self.normal(1))
+
+        o = self.lli4(c0 + n0 * 10, c0, c1 + n1 * 10, c1)
+
+        for t in range(2):
+            p = ap[t * self.order]
+            d = np.array(self.get_derivative(t))
+            p2 = p + d
+            ap[t + 1] = self.lli4(p, p2, o, points[t + 1])
+        return Bezier(ap[:, 0], ap[:, 1])
+
+    def outline(self, d1):
+        reduced = self.reduce()
+        # def linearDistanceFunction(s,e,tlen,alen,slen):
+        #     f1 = alen/tlen
+        #     f2 = (alen+ slen)/tlen
+        #     d = e - s
+        #     return self.map(v)
+        fcurves = []
+        bcurves = []
+        for segment in reduced:
+            fcurves.append(segment.scale(d1))
+            bcurves.append(segment.scale(-d1))
+
 
 x = np.array([100, 10, 110, 150])
 y = np.array([25, 90, 100, 195])
 
 b = Bezier(x, y)
-print(b.get(0.5))
-print(b.get_derivative(0.5))
-print(b.dpoint_x)
-print(b.extrema())
-reduce = b.reduce()
-curves = b.split(0.5)
-curves[0].extrema()
