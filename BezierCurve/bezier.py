@@ -4,7 +4,7 @@ import math
 
 class Bezier():
     def __init__(self, x, y, start=0.0, end=1.0):
-        assert x.size != y.size, 'dim of x, y should be equal'
+        assert x.size == y.size, 'dim of x, y should be equal'
         self.x = x
         self.y = y
         self.t1 = start
@@ -25,16 +25,18 @@ class Bezier():
         abcd = np.array([a, b, c, d])
         x = np.inner(abcd, self.x)  # sum of product, a*x1 + b*x2....
         y = np.inner(abcd, self.y)
-        return (x, y)
+        return x, y
 
     def get_derivative(self, t):
         mt = 1 - t
         a = mt * mt
         b = mt * t * 2
         c = t * t
+        dx  = self.dpoint_x[0]
+        dy = self.dpoint_y[0]
         abc = np.array([a, b, c])
-        x = np.inner(abc, self.x[:3])
-        y = np.inner(abc, self.y[:3])
+        x = np.inner(abc, dx)
+        y = np.inner(abc, dy)
         return [x, y]
 
     def derive(self, points_x, points_y):
@@ -67,10 +69,10 @@ class Bezier():
     def normal(self, t):
         d = self.get_derivative(t)
         q = math.sqrt(d[0] * d[0] + d[1] * d[1])
-        return [-d[1] / q, d[1] / q]
+        return [-d[1] / q, d[0] / q]
 
     def droots(self, p):
-        print(p)
+
         if p.size == 3:
             a = p[0]
             b = p[1]
@@ -101,9 +103,11 @@ class Bezier():
         for i in range(2):
             p_x = self.dpoint_x[i]
             p_y = self.dpoint_y[i]
-            print(p_x)
             x_val += self.droots(np.array(p_x))
             y_val += self.droots(np.array(p_y))
+        x_val = list(filter(lambda x: x >= 0 and x <= 1, x_val))
+        y_val = list(filter(lambda x: x >= 0 and x <= 1, y_val))
+
         return x_val, y_val
 
     def lerp(self, r, v1, v2):
@@ -115,17 +119,17 @@ class Bezier():
         p_y = self.y[:]
 
         p = np.stack((p_x, p_y), axis=-1)
-        print(p)
+
         q = p
 
         while p.shape[0] > 1:
             _p = np.empty((0, 2), float)
-            print(_p)
+
             for i in range(p.shape[0] - 1):
                 pt = self.lerp(t, p[i], p[i + 1])
-                print('pt{}'.format(pt))
+
                 _p = np.append(_p, np.array([pt]), axis=0)
-                print('_p{}'.format(_p))
+
                 q = np.append(q, np.array([pt]), axis=0)
             p = _p
 
@@ -141,7 +145,7 @@ class Bezier():
     def split(self, t1, t2=None):
         # TODO: make a shortcut for t1==0 or t2 == 1
         q = self.hull(t1)
-        print(q)
+
         q_x = q[:, 0]
         q_y = q[:, 1]
         indices_left = [0, 4, 7, 9]
@@ -167,18 +171,17 @@ class Bezier():
         dy1 = v1[1] - o[1]
         dx2 = v2[0] - o[0]
         dy2 = v2[1] - o[1]
-        cross = dx1 * dx2 + dy1 * dy2
+        cross = dx1 * dy2 - dy1 * dx2
         dot = dx1 * dx2 + dy1 * dy2
         return math.atan2(cross, dot)
 
     def simple(self):
-        print(self.x)
-        print(self.y.shape)
+
         p = np.stack((self.x, self.y), axis=-1)
         a1 = self.angle(p[0], p[3], p[1])
         a2 = self.angle(p[0], p[3], p[2])
         if (a1 > 0 and a2 < 0) or (a2 > 0 and a1 < 0):
-            return false
+            return False
 
         n1 = self.normal(0)
         n2 = self.normal(1)
@@ -194,14 +197,15 @@ class Bezier():
         first = []
         second = []
         x, y = self.extrema()
-        print('extrema')
+
         extremas = x + y
-        print(extremas)
+        extremas.sort()
+
         if 0 not in extremas:
             extremas = [0] + extremas
         if 1 not in extremas:
             extremas.append(1)
-        print(extremas)
+
         t1 = extremas[0]
         for e in extremas[1:]:
             t2 = e
@@ -240,12 +244,14 @@ class Bezier():
         return second
 
 
-x = np.array([150, 80, 105, 10])
-y = np.array([40, 30, 150, 10])
+x = np.array([100, 10, 110, 150])
+y = np.array([25, 90, 100, 195])
 
 b = Bezier(x, y)
 print(b.get(0.5))
 print(b.get_derivative(0.5))
 print(b.dpoint_x)
 print(b.extrema())
-print(b.reduce())
+reduce = b.reduce()
+curves = b.split(0.5)
+curves[0].extrema()
