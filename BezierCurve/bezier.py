@@ -13,6 +13,8 @@ class Bezier():
         self.dpoint_x, self.dpoint_y = self.derive(self.x, self.y)
         self.clockwise = self.compute_direction()
 
+
+
     def get(self, t):
         mt = 1 - t
         mt2 = mt**2
@@ -44,6 +46,12 @@ class Bezier():
         p = np.stack((self.x, self.y), axis=-1)
         angle = self.angle(p[0], p[self.order], p[1])
         return angle > 0
+
+    def print_nodes(self):
+        p = np.stack((self.x, self.y), axis=-1)
+        print(p)
+
+
 
     def derive(self, points_x, points_y):
         dpoint_x = []
@@ -313,7 +321,4 @@ class Bezier():
             bcurves.append(segment.scale(-d1))
 
 
-x = np.array([100, 10, 110, 150])
-y = np.array([25, 90, 100, 195])
 
-b = Bezier(x, y)
