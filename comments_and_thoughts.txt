@@ -1,0 +1,11 @@
+> Python Matlab connection:
+
+https://www.mathworks.com/matlabcentral/answers/303896-how-i-can-run-a-simulink-model-from-python-script
+We can run simulink model from python.. we could use this, if it is fast enough for us....
+
+> Or we can use this instead of the matlab models:
+https://simulator.readthedocs.io/en/latest/tutorial/
+It is a bycicle model with PID, in python..
+
+> Another python bycicle model:
+https://gist.github.com/Alexanderallenbrown/e5d2f521b978bb0412ff
