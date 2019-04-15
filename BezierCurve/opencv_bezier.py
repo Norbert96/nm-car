@@ -1,9 +1,9 @@
 import cv2
 import numpy as np
 
-from bezier import Bezier
+
 from bezier_path import BezierPath
-import draw
+
 from draw_helper import *
 
 
@@ -24,13 +24,15 @@ class RoadDesigner:
             i += 1
 
             self.draw_bezier(frame, b, color)
-            # self.draw_scaled_bezier(frame,b, offset)
+            self.draw_scaled_bezier(frame, b, offset)
             self.draw_control_points(frame, b, color)
             self.draw_points(frame, b)
 
-    # def draw_scaled_bezier(self,frame,bezier, offset):
-    #     scaled_bezier = bezier.scale(offset)
-    #     self.draw_bezier(frame,scaled_bezier, (0,0,255))
+    def draw_scaled_bezier(self, frame, bezier, offset):
+        for i in bezier.reduce():
+            for mult in [1, -1]:
+                scaled_bezier = i.scale(mult * offset)
+                self.draw_bezier(frame, scaled_bezier, (0, 0, 255))
 
     def draw_bezier(self, img, bezier, color, scale=20):
         x, y = bezier.get_bezier_points(scale)
@@ -55,6 +57,12 @@ class RoadDesigner:
         if len(self.bpath.bcurves) == 0:
             self.bpath = BezierPath()
 
+    def reduce_curves(self):
+        reduced_curves = []
+        for c in self.bpath.bcurves:
+            reduced_curves += c.reduce()
+        self.bpath.bcurves = reduced_curves
+
     def mouse(self, event, x, y, flags, params):
         if event == cv2.EVENT_LBUTTONDOWN:
             point_ident = self.bpath.look_for_point(x, y)
@@ -77,6 +85,8 @@ class RoadDesigner:
     def key_pressed(self, key):
         if key == ord("d"):
             self.delete_last_point()
+        if key == ord('r'):
+            self.reduce_curves()
 
 
 
@@ -88,7 +98,7 @@ points = []
 
 
 while True:
-    frame = np.zeros((512, 512, 3), np.uint8)
+    frame = np.zeros((800, 1000, 3), np.uint8)
     road_designer.draw(frame)
 
     # for p in points:

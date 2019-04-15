@@ -21,7 +21,7 @@ b1 = Bezier(x1, y1)
 
 # for i in bs:
 # 	b.print_nodes()
-
+bs = b.reduce()
 
 x, y = get_bezier_points(b, 20)
 x1, y1 = get_bezier_points(b1, 20)
