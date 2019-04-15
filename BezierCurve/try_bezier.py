@@ -6,9 +6,9 @@ import matplotlib.pyplot as plt
 
 
 
-x = np.array([100, 10, 110, 150])
-y = np.array([25, 90, 100, 195])
-x1 = np.array([100, 130, 35, 30])
+x = np.array([100, 150+50, 110, 150])
+y = np.array([25, 50+25, 100, 195])
+x1 = np.array([100, 50, 35, 30])
 y1 = np.array([25, 0, 35, 30])
 
 b = Bezier(x, y)
@@ -37,6 +37,7 @@ plt.plot(b.x, b.y, 'o')
 plt.plot(b1.x, b1.y, 'o')
 plt.plot(x,y)
 plt.plot(x1,y1)
+
 
 # plt.plot(x, y, 'bo')
 # plt.legend(['Linear', 'Cubic Spline', 'True'])

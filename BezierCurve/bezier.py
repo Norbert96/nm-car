@@ -30,6 +30,17 @@ class Bezier():
         y = np.inner(abcd, self.y)
         return x, y
 
+    def __getitem__(self, key):
+        return np.array([self.x[key], self.y[key]])
+
+    def __setitem__(self, key, value):
+        self.x[key] = value[0]
+        self.y[key] = value[1]
+
+    def get_points(self):
+        p = np.stack((self.x, self.y), axis=-1)
+        return p
+
     def get_derivative(self, t):
         mt = 1 - t
         a = mt * mt
@@ -319,6 +330,17 @@ class Bezier():
         for segment in reduced:
             fcurves.append(segment.scale(d1))
             bcurves.append(segment.scale(-d1))
+
+    
+    def get_bezier_points(self,scale):
+        x = []
+        y = []
+        for i in range(scale+1):
+            t = (i / scale)
+            p = self.get(t)
+            x.append(p[0])
+            y.append(p[1])
+        return x, y
 
 
 
