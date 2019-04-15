@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
 
-from  bezier import Bezier
+from bezier import Bezier
 from bezier_path import BezierPath
 import draw
-from draw_helper import * 
+from draw_helper import *
+
 
 class RoadDesigner:
 
@@ -17,71 +18,62 @@ class RoadDesigner:
         i = 0
         offset = 30
         for b in self.bpath.bcurves:
-            color = (255,0,0)
-            if i % 2 ==0:
-                color = (0,255,0)
-            i+=1
+            color = (255, 0, 0)
+            if i % 2 == 0:
+                color = (0, 255, 0)
+            i += 1
 
-            self.draw_bezier(frame,b, color)
+            self.draw_bezier(frame, b, color)
             # self.draw_scaled_bezier(frame,b, offset)
-            self.draw_control_points(frame,b, color)
-            self.draw_points(frame,b)
+            self.draw_control_points(frame, b, color)
+            self.draw_points(frame, b)
 
     # def draw_scaled_bezier(self,frame,bezier, offset):
     #     scaled_bezier = bezier.scale(offset)
     #     self.draw_bezier(frame,scaled_bezier, (0,0,255))
 
-
-    def draw_bezier(self, img, bezier, color, scale = 20):
+    def draw_bezier(self, img, bezier, color, scale=20):
         x, y = bezier.get_bezier_points(scale)
-        for i in range(len(x)-1):
-            cv2.line(img, (int(x[i]), int(y[i])),(int(x[i +1]), int(y[i+1])),color,2)
+        for i in range(len(x) - 1):
+            cv2.line(img, (int(x[i]), int(y[i])), (int(x[i + 1]), int(y[i + 1])), color, 2)
 
-
-    def draw_control_points(self, img, bezier, color, helper_line = True):
+    def draw_control_points(self, img, bezier, color, helper_line=True):
         points = get_bezier_points(bezier)
-        cv2.line(img, points[1], points[0], (255,255,255), 1)
-        cv2.circle(frame, points[1],4,color,-1)
-        cv2.line(img, points[2], points[3], (255,255,255), 1)
-        cv2.circle(frame, points[2],4,color,-1)
+        cv2.line(img, points[1], points[0], (255, 255, 255), 1)
+        cv2.circle(frame, points[1], 4, color, -1)
+        cv2.line(img, points[2], points[3], (255, 255, 255), 1)
+        cv2.circle(frame, points[2], 4, color, -1)
 
     def draw_points(self, img, bezier):
 
-        cv2.circle(frame, (int(bezier[0][0]),int(bezier[0][1])),4,  (0,0,255),-1)
-        cv2.circle(frame, (int(bezier[3][0]),int(bezier[3][1])),4,  (0,0,255),-1)
+        cv2.circle(frame, (int(bezier[0][0]), int(bezier[0][1])), 4, (0, 0, 255), -1)
+        cv2.circle(frame, (int(bezier[3][0]), int(bezier[3][1])), 4, (0, 0, 255), -1)
 
     def delete_last_point(self):
         self.bpath.bcurves = self.bpath.bcurves[:-1]
         if len(self.bpath.bcurves) == 0:
             self.bpath = BezierPath()
 
-    
-
-    
-
-
     def mouse(self, event, x, y, flags, params):
         if event == cv2.EVENT_LBUTTONDOWN:
-            point_ident = self.bpath.look_for_point(x,y)
-            # print(point_ident)
+            point_ident = self.bpath.look_for_point(x, y)
+
             if point_ident:
                 self.moving_point = point_ident
                 self.drag = True
         if event == cv2.EVENT_MOUSEMOVE:
             if self.drag:
-                self.bpath.move_point(self.moving_point,x, y)
-                
+                self.bpath.move_point(self.moving_point, x, y)
 
         if event == cv2.EVENT_LBUTTONUP:
-            if self.drag: #dropping
-                self.drag =  False
-                return 
-            self.bpath.add_point([x,y])
+            if self.drag:  # dropping
+                self.drag = False
+                return
+            self.bpath.add_point([x, y])
 
     def key_pressed(self, key):
         if key == ord("d"):
             self.delete_last_point()
-
 
 
 
@@ -93,9 +85,8 @@ points = []
 
 
 while True:
-    frame =np.zeros((512,512,3), np.uint8)
+    frame = np.zeros((512, 512, 3), np.uint8)
     road_designer.draw(frame)
-    
 
     # for p in points:
 
