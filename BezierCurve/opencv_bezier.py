@@ -51,6 +51,7 @@ class RoadDesigner:
 
     def delete_last_point(self):
         self.bpath.bcurves = self.bpath.bcurves[:-1]
+        self.bpath.closed = False
         if len(self.bpath.bcurves) == 0:
             self.bpath = BezierPath()
 
@@ -68,8 +69,10 @@ class RoadDesigner:
         if event == cv2.EVENT_LBUTTONUP:
             if self.drag:  # dropping
                 self.drag = False
+                self.bpath.close_if_should(self.moving_point, x, y)
                 return
-            self.bpath.add_point([x, y])
+            if not self.bpath.closed:
+                self.bpath.add_point([x, y])
 
     def key_pressed(self, key):
         if key == ord("d"):

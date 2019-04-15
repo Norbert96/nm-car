@@ -7,6 +7,7 @@ class BezierPath():
         self.bcurves = []
         self.first_point = None
         self.continous = continous
+        self.closed = False
 
     def add_point(self, point):
         point = np.array(point)
@@ -57,29 +58,78 @@ class BezierPath():
             dist = self.distance_of_points(point_to_modify, middle_point)
             self.bcurves[index - 1][2] = middle_point + dist * self.calc_direction_vector(middle_point, bezier[n])
         if n == 2:
-            point_to_modify = self.bcurves[index + 1][1]
-            middle_point = self.bcurves[index + 1][0]
+            try:
+                point_to_modify = self.bcurves[index + 1][1]
+                middle_point = self.bcurves[index + 1][0]
+            except IndexError as e:
+                if not self.closed:
+                    raise e
+                else:
+                    point_to_modify = self.bcurves[0][1]
+                    middle_point = self.bcurves[0][0]
+                    dist = self.distance_of_points(point_to_modify, middle_point)
+                    self.bcurves[0][1] = middle_point + dist * self.calc_direction_vector(middle_point,
+                                                                                          bezier[n])
+                    return
+
             dist = self.distance_of_points(point_to_modify, middle_point)
             # print(self.calc_direction_vector( middle_point, bezier[n]))
             self.bcurves[index + 1][1] = middle_point + dist * self.calc_direction_vector(middle_point, bezier[n])
+
+    def close_if_should(self, point_ident, x, y):
+        bezier = point_ident[0]
+        n = point_ident[1]
+
+        index = self.bcurves.index(bezier)
+
+        if [index, n] == [0, 0]:
+            if self.distance_of_points([x, y], self.bcurves[-1][3]) < 4:
+                print('closed')
+                self.closed = True
+                self.move_point((bezier, 1), bezier[1][0], bezier[1][1])
+                bezier[n] = self.bcurves[-1][3]
+        if [index, n] == [len(self.bcurves) - 1, 3]:
+            if self.distance_of_points([x, y], self.bcurves[0][0]) < 4:
+                self.closed = True
+                print('closed')
+                self.move_point((bezier, 2), bezier[1][0], bezier[1][1])
+                a = self.bcurves[0][0]
+                bezier[n] = self.bcurves[0][0]
 
     def move_point(self, point_ident, x, y):
         bezier = point_ident[0]
         n = point_ident[1]
         offset = [x, y] - bezier[n]
         bezier[n] = [x, y]
-        index = self.bcurves.index(bezier)
 
-        if index == 0 or index == len(self.bcurves) - 1:
+        index = self.bcurves.index(bezier)
+        last_index = len(self.bcurves) - 1
+
+        if [index, n] in [[0, 1], [0, 0], [last_index, 2], [last_index, 3]] and not self.closed:
+            if n == 0:
+                bezier[1] += offset
+            if n == 3:
+                bezier[2] += offset
+
             return
+
         if n == 0:
             bezier[1] += offset
             next_bezier = self.bcurves[index - 1]
+
             next_bezier[3] = [x, y]
             next_bezier[2] += offset
         if n == 3:
             bezier[2] += offset
-            next_bezier = self.bcurves[index + 1]
+            try:
+                next_bezier = self.bcurves[index + 1]
+
+            except IndexError as e:
+                if not self.closed:
+                    raise e
+                else:
+                    next_bezier = self.bcurves[0]
+
             next_bezier[0] = [x, y]
             next_bezier[1] += offset
 
