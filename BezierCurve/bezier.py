@@ -10,8 +10,19 @@ class Bezier():
         self.t1 = start
         self.t2 = end
         self.order = self.x.size - 1
+        self.dpoint_x = None
+        self.dpoint_y = None
+        self.clockwise = None
+        self.stacked_points = None
+        self.reduced = []
+        self.update()
+
+    def update(self):
         self.dpoint_x, self.dpoint_y = self.derive(self.x, self.y)
         self.clockwise = self.compute_direction()
+        self.stacked_points = np.stack((self.x, self.y), axis=-1)
+        self.reduced = []
+
 
     def get(self, t):
         mt = 1 - t
@@ -34,6 +45,7 @@ class Bezier():
     def __setitem__(self, key, value):
         self.x[key] = value[0]
         self.y[key] = value[1]
+        self.update()
 
     def get_points(self):
         p = np.stack((self.x, self.y), axis=-1)
@@ -87,10 +99,14 @@ class Bezier():
             p_y = l_y
         return (dpoint_x, dpoint_y)
 
+
     def normal(self, t):
         d = self.get_derivative(t)
         q = math.sqrt(d[0] * d[0] + d[1] * d[1])
-        return [-d[1] / q, d[0] / q]
+        if q < 0.001 and q > -0.001:
+            print("will be zero")
+        ret = [-d[1] / q, d[0] / q]
+        return  ret
 
     def droots(self, p):
 
@@ -136,13 +152,8 @@ class Bezier():
         return p
 
     def hull(self, t):
-        p_x = self.x[:]
-        p_y = self.y[:]
-
-        p = np.stack((p_x, p_y), axis=-1)
-
+        p = self.stacked_points
         q = p
-
         while p.shape[0] > 1:
             _p = np.empty((0, 2), float)
 
@@ -185,6 +196,11 @@ class Bezier():
 
         t2 = self.map(t2, t1, 1, 0, 1)
         subsplit = result_right.split(t2)
+
+        #if subsplit[0]*4 == [i for i in subsplit[i]]:
+         #   print('equal')
+         #   print('equal')
+
         return subsplit[0]
 
     def angle(self, o, v1, v2):
@@ -212,9 +228,11 @@ class Bezier():
         return angle < math.pi / 3
 
     def reduce(self):
+        if self.reduced:
+            return self.reduced
         t1 = 0
         t2 = 0
-        step = 0.01
+        step = 0.1
         first = []
         second = []
         x, y = self.extrema()
@@ -242,7 +260,7 @@ class Bezier():
 
             while t2 <= 1:
                 t2 = t1 + step
-                while t2 <= 1 + step:
+                while t2 <= 1:
                     segment = p1.split(t1, t2)
                     if not segment.simple():
                         t2 -= step
@@ -261,8 +279,8 @@ class Bezier():
                 segment.t1 = self.map(t1, 0, 1, p1.t1, p1.t2)
                 segment.t2 = p1.t2
                 second.append(segment)
-
-        return second
+        self.reduced = second
+        return self.reduced
 
     def offset(self, t, d):
         # TODO linear
@@ -316,11 +334,6 @@ class Bezier():
 
     def outline(self, d1):
         reduced = self.reduce()
-        # def linearDistanceFunction(s,e,tlen,alen,slen):
-        #     f1 = alen/tlen
-        #     f2 = (alen+ slen)/tlen
-        #     d = e - s
-        #     return self.map(v)
         fcurves = []
         bcurves = []
         for segment in reduced:

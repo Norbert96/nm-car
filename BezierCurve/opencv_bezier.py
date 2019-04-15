@@ -91,6 +91,7 @@ class RoadDesigner:
 
 
 # cap = cv2.VideoCapture(0)
+np.seterr(all='warn')
 road_designer = RoadDesigner()
 cv2.namedWindow("Frame")
 cv2.setMouseCallback("Frame", road_designer.mouse)
