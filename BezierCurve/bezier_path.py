@@ -69,6 +69,9 @@ class BezierPath():
         offset = [x, y] - bezier[n]
         bezier[n] = [x, y]
         index = self.bcurves.index(bezier)
+
+        if index == 0 or index == len(self.bcurves) - 1:
+            return
         if n == 0:
             bezier[1] += offset
             next_bezier = self.bcurves[index - 1]
