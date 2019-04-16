@@ -32,6 +32,20 @@ class BezierPath():
             curve_points = np.array([self.first_point, self.first_point + np.array([1, 0]) * dist, point - np.array([0, -1]) * dist, point])
             self.bcurves.append(Bezier(curve_points[:, 0], curve_points[:, 1]))
 
+    def json_serialize(self):
+        data = {}
+        data['bezier_nodes'] = []
+
+        for b in self.bcurves:
+            node = {}
+            x = list(b.x)
+            y = list(b.y)
+            node['x'] = x
+            node['y'] = y
+            data['bezier_nodes'].append(node)
+
+        return data
+
     def look_for_point(self, x, y):
         mouse_coord = np.array([x, y])
         for b in self.bcurves:

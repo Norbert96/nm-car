@@ -25,6 +25,7 @@ class RoadDesigner:
 
             self.draw_bezier(frame, b, color)
             self.draw_scaled_bezier(frame, b, offset)
+            self.draw_line_from_distance(frame, b, offset)
             self.draw_control_points(frame, b, color)
             self.draw_points(frame, b)
 
@@ -33,6 +34,11 @@ class RoadDesigner:
             for mult in [1, -1]:
                 scaled_bezier = i.scale(mult * offset)
                 self.draw_bezier(frame, scaled_bezier, (0, 0, 255))
+
+    def draw_line_from_distance(self, frame, bezier, dist):
+        x, y = bezier.get_bezier_points_offseted(dist)
+        for i in range(len(x) - 1):
+            cv2.line(frame, (int(x[i]), int(y[i])), (int(x[i + 1]), int(y[i + 1])), (0, 255, 255), 2)
 
     def draw_bezier(self, img, bezier, color, scale=20):
         x, y = bezier.get_bezier_points(scale)
@@ -87,6 +93,14 @@ class RoadDesigner:
             self.delete_last_point()
         if key == ord('r'):
             self.reduce_curves()
+        if key == ord('s'):
+            data = self.bpath.json_serialize()
+            import time
+            import json
+            with open('racetrack-{}.json'.format(int(time.time())), 'w') as outfile:
+                json.dump(data, outfile)
+                return True
+        return False
 
 
 
@@ -112,6 +126,8 @@ while True:
     if key == 27:
         break
     else:
-        road_designer.key_pressed(key)
+        exit = road_designer.key_pressed(key)
+        if exit:
+            break
 cap.release()
 cv2.destroyAllWindows()

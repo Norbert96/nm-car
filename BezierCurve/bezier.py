@@ -23,7 +23,6 @@ class Bezier():
         self.stacked_points = np.stack((self.x, self.y), axis=-1)
         self.reduced = []
 
-
     def get(self, t):
         mt = 1 - t
         mt2 = mt**2
@@ -37,7 +36,7 @@ class Bezier():
         abcd = np.array([a, b, c, d])
         x = np.inner(abcd, self.x)  # sum of product, a*x1 + b*x2....
         y = np.inner(abcd, self.y)
-        return x, y
+        return np.array([x, y])
 
     def __getitem__(self, key):
         return np.array([self.x[key], self.y[key]])
@@ -99,14 +98,13 @@ class Bezier():
             p_y = l_y
         return (dpoint_x, dpoint_y)
 
-
     def normal(self, t):
         d = self.get_derivative(t)
         q = math.sqrt(d[0] * d[0] + d[1] * d[1])
         if q < 0.001 and q > -0.001:
             print("will be zero")
         ret = [-d[1] / q, d[0] / q]
-        return  ret
+        return np.array(ret)
 
     def droots(self, p):
 
@@ -197,9 +195,9 @@ class Bezier():
         t2 = self.map(t2, t1, 1, 0, 1)
         subsplit = result_right.split(t2)
 
-        #if subsplit[0]*4 == [i for i in subsplit[i]]:
-         #   print('equal')
-         #   print('equal')
+        # if subsplit[0]*4 == [i for i in subsplit[i]]:
+        #   print('equal')
+        #   print('equal')
 
         return subsplit[0]
 
@@ -348,4 +346,16 @@ class Bezier():
             p = self.get(t)
             x.append(p[0])
             y.append(p[1])
+        return x, y
+
+    def get_bezier_points_offseted(self, offset, scale=20):
+        x = []
+        y = []
+        for i in range(scale + 1):
+            t = i / scale
+            p = self.get(t)
+            n = self.normal(t)
+            o = p + n * offset
+            x.append(o[0])
+            y.append(o[1])
         return x, y
