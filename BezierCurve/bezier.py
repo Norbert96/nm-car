@@ -359,3 +359,12 @@ class Bezier():
             x.append(o[0])
             y.append(o[1])
         return x, y
+
+    def get_bezier_control_points(self, bezier, integer=True):
+        ret = []
+        for i in range(4):
+            if integer:
+                ret.append((int(bezier[i][0]), int(bezier[i][1])))
+            else:
+                ret.append((bezier[i][0], bezier[i][1]))
+        return ret

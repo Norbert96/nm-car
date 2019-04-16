@@ -34,15 +34,15 @@ class BezierPath():
 
     def json_serialize(self):
         data = {}
-        data['bezier_nodes'] = []
+        data['bezier_curves'] = []
 
         for b in self.bcurves:
-            node = {}
+            curve = {}
             x = list(b.x)
             y = list(b.y)
-            node['x'] = x
-            node['y'] = y
-            data['bezier_nodes'].append(node)
+            curve['x'] = x
+            curve['y'] = y
+            data['bezier_curves'].append(curve)
 
         return data
 

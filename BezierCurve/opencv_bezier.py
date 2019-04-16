@@ -6,6 +6,8 @@ from bezier_path import BezierPath
 
 from draw_helper import *
 
+from draw import *
+
 
 class RoadDesigner:
 
@@ -23,39 +25,11 @@ class RoadDesigner:
                 color = (0, 255, 0)
             i += 1
 
-            self.draw_bezier(frame, b, color)
-            self.draw_scaled_bezier(frame, b, offset)
-            self.draw_line_from_distance(frame, b, offset)
-            self.draw_control_points(frame, b, color)
-            self.draw_points(frame, b)
-
-    def draw_scaled_bezier(self, frame, bezier, offset):
-        for i in bezier.reduce():
-            for mult in [1, -1]:
-                scaled_bezier = i.scale(mult * offset)
-                self.draw_bezier(frame, scaled_bezier, (0, 0, 255))
-
-    def draw_line_from_distance(self, frame, bezier, dist):
-        x, y = bezier.get_bezier_points_offseted(dist)
-        for i in range(len(x) - 1):
-            cv2.line(frame, (int(x[i]), int(y[i])), (int(x[i + 1]), int(y[i + 1])), (0, 255, 255), 2)
-
-    def draw_bezier(self, img, bezier, color, scale=20):
-        x, y = bezier.get_bezier_points(scale)
-        for i in range(len(x) - 1):
-            cv2.line(img, (int(x[i]), int(y[i])), (int(x[i + 1]), int(y[i + 1])), color, 2)
-
-    def draw_control_points(self, img, bezier, color, helper_line=True):
-        points = get_bezier_points(bezier)
-        cv2.line(img, points[1], points[0], (255, 255, 255), 1)
-        cv2.circle(frame, points[1], 4, color, -1)
-        cv2.line(img, points[2], points[3], (255, 255, 255), 1)
-        cv2.circle(frame, points[2], 4, color, -1)
-
-    def draw_points(self, img, bezier):
-
-        cv2.circle(frame, (int(bezier[0][0]), int(bezier[0][1])), 4, (0, 0, 255), -1)
-        cv2.circle(frame, (int(bezier[3][0]), int(bezier[3][1])), 4, (0, 0, 255), -1)
+            draw_bezier(frame, b, color)
+            draw_scaled_bezier(frame, b, offset)
+            draw_line_from_distance(frame, b, offset)
+            draw_control_points(frame, b, color)
+            draw_points(frame, b)
 
     def delete_last_point(self):
         self.bpath.bcurves = self.bpath.bcurves[:-1]
@@ -103,8 +77,6 @@ class RoadDesigner:
         return False
 
 
-
-# cap = cv2.VideoCapture(0)
 np.seterr(all='warn')
 road_designer = RoadDesigner()
 cv2.namedWindow("Frame")
@@ -129,5 +101,5 @@ while True:
         exit = road_designer.key_pressed(key)
         if exit:
             break
-cap.release()
+
 cv2.destroyAllWindows()
