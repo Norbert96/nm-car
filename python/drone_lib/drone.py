@@ -1,6 +1,6 @@
 
 import numpy as np
-from drone_consts import *
+from .drone_consts import *
 
 
 class Drone(object):
@@ -12,21 +12,39 @@ class Drone(object):
         self.current_state = np.zeros((3,))
         self.controll_to_rad_transfer = np.array([max_pitch_angle, max_roll_angle, 1])
         self.change = np.array([max_d_pitch, max_d_roll, max_d_yaw])
-        self.gravity_force = mass * 9.80665
+        self.gravity_force = 9.80665 * mass
+        self.speed = np.array([0, 0])
 
     def controll(self, cnts):
         self.target_state = self.controll_to_rad(cnts)
 
-    def get_acc(self, time):
+    def sim(self, time):
         self.forward(time)
-        acc = self.gravity_force * np.tan(self.current_state[:2])
-        self.rotate(acc, self.current_state[2])
+        pull_force = self.gravity_force * np.tan(self.current_state[:2])
+        pull_force = self.rotate(pull_force, self.current_state[2])
+
+        Fd = self.calculate_air_resistance()
+        force = pull_force + Fd
+        acc = force / mass
+        self.speed = self.speed + acc * time
+        print('pull_force: {} Fd: {} speed: {} acc: {} '.format(pull_force, Fd, self.speed, acc))
         return acc
 
-    def rotate(self, acc, theta):
+    def calculate_air_resistance(self):
+        speedabs = np.linalg.norm(self.speed)
+        if speedabs == 0:
+            return np.array([0,0])
+        Fdabs = -0.5 * speedabs ** 2 * density_of_air * cd * A
+        Fd = (self.speed/speedabs)*Fdabs
+        return Fd
+
+    def rotate(self, vec, theta):
         c, s = np.cos(theta), np.sin(theta)
-        r_matrix = np.array([[c, s], [-s, c]])
-        return acc * r_matrix
+        r_matrix = np.array([[c, -s], [s, c]])
+        return r_matrix.dot(vec)
+
+    def get_direction(self):
+        return self.current_state[2]
 
     def forward(self, time):
         step_change = time * self.change
