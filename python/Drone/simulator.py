@@ -1,15 +1,40 @@
+from drone import Drone
+import numpy as np
 
-
-def DroneRTSimulator():
+class DroneRTSimulator(object):
     def __init__(self, drone, simulation_freq=100):
         self.drone = drone
-        self.position = [0, 0]
+        self.simulation_period = 1/simulation_freq
+        self.position = np.array([0, 0])
+        self.speed = np.array([0, 0])
 
-    def controll(cnt):
+    def controll(self, cnt):
         self.drone.controll(cnt)
 
-    def set_starting_position(startin_position):
-        self.position = startin_position
+    def set_starting_position(self, starting_position):
+        self.position = starting_position
 
-    def simulate():
-        acc = self.drone.get_acc()
+    def simulate(self):
+        acc = self.drone.get_acc(self.simulation_period)
+        self.position = self.position + self.speed * self.simulation_period
+        self.speed = self.speed + acc * self.simulation_period
+
+
+
+
+def try_drone():
+
+    d = Drone()
+    controll = [1, 1, 0]
+    d.controll(controll)
+    ds = DroneRTSimulator(d)
+    for i in range(100):
+        if i > 20:
+            ds.controll([1,0,0])
+        ds.simulate()
+        print("Speed: {}".format(ds.speed))
+        print("Position: {}".format(ds.position))
+
+
+try_drone()
+
