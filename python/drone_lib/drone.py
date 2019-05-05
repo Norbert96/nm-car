@@ -67,7 +67,7 @@ class Drone(object):
             self.current_state[2] = 2 * np.pi + self.current_state[2]
 
         if self.current_state[2] > 2 * np.pi:
-            self.current_state[2] = self.current_state - 2 * np.pi
+            self.current_state[2] = self.current_state[2] - 2 * np.pi
 
     def controll_to_rad(self, cnts):
         return self.controll_to_rad_transfer * cnts

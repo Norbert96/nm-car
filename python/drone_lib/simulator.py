@@ -15,8 +15,11 @@ class DroneRTSimulator(object):
     def set_starting_position(self, starting_position):
         self.position = starting_position
 
-    def simulate(self):
-        acc = self.drone.sim(self.simulation_period)
+    def simulate(self, sim_time = None):
+        if sim_time:
+            self.drone.sim(sim_time)
+        else:
+            self.drone.sim(self.simulation_period)
         self.position = self.position + self.drone.speed * self.simulation_period
 
 
