@@ -172,6 +172,12 @@ class Bezier():
         r = v2 / d1
         return ts + d2 * r
 
+    def get_approximate_lenght(self, seg_count=100):
+        length = 0
+        for i in range(seg_count):
+            length += np.linalg.norm(self.get(i / seg_count) - self.get((i + 1) / seg_count))
+        return length
+
     def split(self, t1, t2=None):
         # TODO: make a shortcut for t1==0 or t2 == 1
         q = self.hull(t1)
@@ -368,3 +374,13 @@ class Bezier():
             else:
                 ret.append((bezier[i][0], bezier[i][1]))
         return ret
+
+
+# x = np.array([0, 0, 1, 1])
+# y = np.array([0, 0, 1, 0])
+
+# b = Bezier(x, y)
+# print(b.get_approximate_lenght(10))
+# print(b.get_approximet_lenght(2))
+# print(b.get_approximet_lenght(3))
+# print(b.get_approximet_lenght(4))
