@@ -31,7 +31,10 @@ start_time = time.time()
 while True:
     frame = np.zeros((800, 1000, 3), np.uint8)
     cc.map.draw_map_line(frame)
-    cc.run(time.time() - start_time)
+
+    #cc.run(time.time() - start_time)
+    cc.run(0.1)
+
     start_time = time.time()
     rabbit_position = cc.get_rabbit_position().astype(int)
     drone_position = cc.get_drone_position().astype(int)
