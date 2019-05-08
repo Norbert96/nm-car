@@ -1,4 +1,4 @@
-from bezier import Bezier
+from BezierCurve.bezier import Bezier
 import numpy as np
 
 

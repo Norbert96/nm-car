@@ -102,7 +102,7 @@ class Bezier():
         d = self.get_derivative(t)
         q = math.sqrt(d[0] * d[0] + d[1] * d[1])
         if q < 0.001 and q > -0.001:
-            print("will be zero")
+            pass
         ret = [-d[1] / q, d[0] / q]
         return np.array(ret)
 

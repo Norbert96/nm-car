@@ -2,11 +2,11 @@ import cv2
 import numpy as np
 
 
-from bezier_path import BezierPath
+from BezierCurve.bezier_path import BezierPath
 
-from draw_helper import *
+# from BezierCurve.draw_helper import *
 
-from draw import *
+from BezierCurve.draw import *
 
 
 class RoadDesigner:
