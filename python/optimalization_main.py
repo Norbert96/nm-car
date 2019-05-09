@@ -1,5 +1,5 @@
-from RaceTrack.map import Map
-from ClassicControlling.classic_controll import ClassicControll
+
+from ClassicControlling.optimalization import OptimalizationControllAgent
 import numpy as np
 import cv2
 import time
@@ -25,13 +25,14 @@ def draw_drone(frame, pos, dir):
 
 map_file = 'racetrack-1555403390.json'
 
-cc = ClassicControll(map_file)
+cc = OptimalizationControllAgent(map_file)
 
 start_time = time.time()
 while True:
     frame = np.zeros((800, 1000, 3), np.uint8)
     cc.map.draw_map(frame)
 
+    frame = cc.map.draw_path_line_points(frame)
     #cc.run(time.time() - start_time)
     cc.run(0.1)
 

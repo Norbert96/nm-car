@@ -5,12 +5,15 @@ from BezierCurve.draw import *
 
 
 class Map():
-    def __init__(self, map_file, relative_path_len_ratio = 1):
-        self.relative_path_len_ratio = relative_path_len_ratio
+    def __init__(self, map_file):
+
         self.curve_list = self.load_map(map_file)
         self.current_distance = 0
         self.map_distance_intervals = self.create_distance_interval()
         self.path_len = self.map_distance_intervals[-1][1]
+
+    def draw_map(self, frame):
+        return self.draw_map_line(frame)
 
     def draw_map_line(self, frame):
         for bezier in self.curve_list:
@@ -56,7 +59,7 @@ class Map():
         return point
 
     def forward(self, m):
-        m = self.relative_path_len_ratio * m
+        # m = self.relative_path_len_ratio * m
         self.current_distance += m
         return self.get_point_distance_from_start(self.current_distance)
 

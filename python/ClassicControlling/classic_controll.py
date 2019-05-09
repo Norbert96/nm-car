@@ -64,7 +64,7 @@ class ClassicControll():
         controll[2] *=100
         controll = np.tanh(controll)
         controll *= self.disable_controll
-        print(controll)
+        # print(controll)
         return controll
 
     def get_drone_position(self):
