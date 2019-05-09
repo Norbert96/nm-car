@@ -2,32 +2,70 @@ from ClassicControlling.classic_controll import ClassicControll
 from RaceTrack.map import Map
 from BezierCurve.draw import *
 import numpy as np
+from drone_lib.drone import Drone
 
+import time
 
 class OptimalizationControllAgent(ClassicControll):
     def __init__(self, map_json,max_distance_from_middle=20):
         ClassicControll.__init__(self, map_json)
+        self.simulation_time = 0.1
         self.speed_section_num = 100
-        self.initial_speed = 5
+        self.initial_speed = 8
         self.speed_delta = 1
         self.max_distance_from_middle = max_distance_from_middle
         self.map = OptimalizationMap(map_json,self.max_distance_from_middle )
         self.round = 0
         self.i = 0
         self.rabbit_speed = 15
-
+        self.last_modified_section = None
         self.out_start_zone = False
-        self.last_distance_from_finish_line = None
+
 
     def start_optimalization(self):
         self.section_speed = [self.initial_speed] * self.speed_section_num
 
         while True:
-            self.run(0.1)
+
+            self.res()
+            succes, time = self.one_round()
+            if succes:
+                print("LAP time: {}".format(time))
+                self.increase_speed_randomly()
+            else:
+                print("Failed")
+                self.decrease_last_modifed_section()
+
+            #if not self.map.point_on_route(self.drone.position):
+
+    def increase_speed_randomly(self):
+        speed_sect_to_modify = np.random.randint(self.speed_section_num)
+        self.section_speed[speed_sect_to_modify] += self.speed_delta
+        self.last_modified_section = speed_sect_to_modify
+
+    def decrease_last_modifed_section(self):
+        if self.last_modified_section is not None:
+            self.section_speed[self.last_modified_section] -= self.speed_delta
+
+
+    def one_round(self):
+        time = 0
+        while True:
+            speed_sect = self.map.in_which_speed_section(self.speed_section_num)
+            self.rabbit_speed = self.section_speed[speed_sect]
+            self.run(self.simulation_time)
+            time += self.simulation_time
+            if not self.map.point_on_route(self.drone.position):
+                return False,time
+            if self.is_finished():
+                return True, time
+
 
     def res(self):
         self.out_start_zone = False
-        self.last_distance_from_finish_line = None
+        self.drone = Drone()
+        self.drone.position = self.map.get_rabbit_position()
+        self.map.restart()
 
 
     def run(self, t):
@@ -40,21 +78,18 @@ class OptimalizationControllAgent(ClassicControll):
         #     self.round = self.map.current_distance // self.map.path_len
         #     print(self.i)
 
-        self.map.point_on_route(self.drone.position)
-        print(self.is_finished())
+
+
 
 
     def is_finished(self):
-        distance_from_finish_line, distance_from_finish_point = self.map.distance_from_finish_line_and_point(self.drone.position)
+        distance_from_finish_point = self.map.distance_from_finish_point(self.drone.position)
         if distance_from_finish_point > self.max_distance_from_middle:
             self.out_start_zone = True
 
-        if self.out_start_zone:
-            if self.max_distance_from_middle > distance_from_finish_line: #in start zone again
-                if self.last_distance_from_finish_line is not None:
-                    if self.last_distance_from_finish_line * distance_from_finish_line < 0.0:
-                        return True
-                self.last_distance_from_finish_line = distance_from_finish_line
+        if self.out_start_zone and self.max_distance_from_middle > distance_from_finish_point:
+            return True
+
 
         return False
 
@@ -85,16 +120,11 @@ class OptimalizationMap(Map):
         line = np.array([[x1[0],y1[0]], [x2[0], y2[0]]])
         return line
 
-    def distance_from_finish_line_and_point(self, drone_position):
-        p1 = self.finish_line[0]
-        p2 = self.finish_line[1]
-        p3 = drone_position
-
-        distance_from_finish_line = np.cross(p2 - p1, p3 - p1) / np.linalg.norm(p2 - p1)
+    def distance_from_finish_point(self, drone_position):
         starting_point = self.curve_list[0].get(0)
         distance_from_finish_point = np.linalg.norm(drone_position - starting_point)
 
-        return distance_from_finish_line, distance_from_finish_point
+        return  distance_from_finish_point
 
 
 
@@ -126,7 +156,7 @@ class OptimalizationMap(Map):
             p2 = tuple(self.path_line_points[1][i].astype(int))
             cv2.line(frame,p1 , p2, (255, 255, 255), 1)
 
-        return  frame
+        return frame
 
 
     def line_distance_from_point(self, l1, l2, p):
@@ -201,12 +231,12 @@ class OptimalizationMap(Map):
         #closest_dist1 = self.line_distance_from_point(self.path_line_points[0], self.path_line_points[1], point).min()
         closest_dist2 = np.linalg.norm(self.middle_line_points-point, axis=1).min()
         #print('By line: ' + str(closest_dist1))
-        print('By point: ' + str(closest_dist2))
+        #print('By point: ' + str(closest_dist2))
         return closest_dist2 < self.max_distance_from_midline
 
     def in_which_speed_section(self, section_number):
         dist_from_start = self.current_distance % self.path_len
-        section_index = dist_from_start // (path_len / section_number)
-        return section_index
+        section_index = dist_from_start // (self.path_len / section_number)
+        return int(section_index)
 
     # def step(self, time):

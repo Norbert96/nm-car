@@ -26,7 +26,7 @@ def draw_drone(frame, pos, dir):
 map_file = 'racetrack-1555403390.json'
 
 cc = OptimalizationControllAgent(map_file)
-
+cc.start_optimalization()
 start_time = time.time()
 while True:
     frame = np.zeros((800, 1000, 3), np.uint8)
