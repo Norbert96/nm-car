@@ -23,34 +23,34 @@ def draw_drone(frame, pos, dir):
     return frame
 
 
-map_file = 'racetrack-1555403390.json'
+map_file = 'racetrack.json'
 
 cc = OptimalizationControllAgent(map_file)
 cc.start_optimalization()
-start_time = time.time()
-while True:
-    frame = np.zeros((800, 1000, 3), np.uint8)
-    cc.map.draw_map(frame)
+# start_time = time.time()
+# while True:
+#     frame = np.zeros((800, 1000, 3), np.uint8)
+#     cc.map.draw_map(frame)
 
-    frame = cc.map.draw_path_line_points(frame)
-    #cc.run(time.time() - start_time)
-    cc.run(0.1)
+#     frame = cc.map.draw_path_line_points(frame)
+#     #cc.run(time.time() - start_time)
+#     cc.run(0.1)
 
-    start_time = time.time()
-    rabbit_position = cc.get_rabbit_position().astype(int)
-    drone_position = cc.get_drone_position().astype(int)
+#     start_time = time.time()
+#     rabbit_position = cc.get_rabbit_position().astype(int)
+#     drone_position = cc.get_drone_position().astype(int)
 
-    cv2.circle(frame, (rabbit_position[0], rabbit_position[1]), 4, (255, 0, 0), -1)
-    draw_drone(frame, cc.drone.position, cc.drone.get_direction())
-    # for p in points:
+#     cv2.circle(frame, (rabbit_position[0], rabbit_position[1]), 4, (255, 0, 0), -1)
+#     draw_drone(frame, cc.drone.position, cc.drone.get_direction())
+#     # for p in points:
 
-    #     cv2.circle(frame, p,4,  (0,255,0),-1)
+#     #     cv2.circle(frame, p,4,  (0,255,0),-1)
 
-    cv2.imshow("Frame", frame)
-    key = cv2.waitKey(1)
+#     cv2.imshow("Frame", frame)
+#     key = cv2.waitKey(1)
 
-    if key == 27:
-        break
+#     if key == 27:
+#         break
 
 
-cv2.destroyAllWindows()
+# cv2.destroyAllWindows()
