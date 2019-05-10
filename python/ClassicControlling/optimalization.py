@@ -14,7 +14,7 @@ class OptimalizationControllAgent(ClassicControll):
         self.speed_section_num = 100
         self.initial_speed = 8
         self.speed_delta = 1
-        self.modifying_section_num = 20
+        self.modifying_section_num = 10
         self.max_distance_from_middle = max_distance_from_middle
         self.map = OptimalizationMap(map_json, self.max_distance_from_middle)
         self.round = 0
@@ -37,9 +37,9 @@ class OptimalizationControllAgent(ClassicControll):
                 succes, time, track = self.one_round()
                 if self.first_track is None:
                     self.first_track = track
-                if succes:
-                    if time > 10:
-                        print("LAP time: {:.1f} s".format(time))
+                if succes and time > 10:
+
+                    print("LAP time: {:.1f} s".format(time))
                     self.increase_speed_randomly()
                     self.last_track = track
                 else:

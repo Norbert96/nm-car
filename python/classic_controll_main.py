@@ -23,7 +23,7 @@ def draw_drone(frame, pos, dir):
     return frame
 
 
-map_file = 'racetrack-1555403390.json'
+map_file = 'racetrack.json'
 
 cc = ClassicControll(map_file)
 
